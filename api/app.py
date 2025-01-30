@@ -1,0 +1,25 @@
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS  # Permite requisições entre domínios (se necessário)
+from search import buscar_produtos  # Importando a função de busca
+
+app = Flask(__name__)
+CORS(app)  # Habilita CORS para permitir requisições do frontend
+
+@app.route("/")
+def index():
+    return render_template("index.html")  # Servindo a página HTML
+
+@app.route("/buscar", methods=["GET"])
+def buscar():
+    nome_produto = request.args.get("produto")
+    preco_min = request.args.get("preco_min", type=float)
+    preco_max = request.args.get("preco_max", type=float)
+
+    if not nome_produto:
+        return jsonify({"error": "Informe um produto na URL, exemplo: /buscar?produto=iphone"}), 400
+
+    produtos = buscar_produtos(nome_produto, preco_min, preco_max)
+    return jsonify(produtos)
+
+if __name__ == "__main__":
+    app.run(debug=True)

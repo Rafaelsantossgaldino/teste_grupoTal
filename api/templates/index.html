@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de Produtos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        #searchForm {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+        #resultados {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .produto {
+            background: white;
+            padding: 15px;
+            width: 250px;
+            border-radius: 16px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+        }
+        .produto:hover {
+            transform: scale(1.05);
+        }
+        .produto h3 {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .produto p {
+            font-size: 14px;
+            color: #333;
+        }
+        .produto a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        .produto a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Buscar Produtos</h1>
+
+    <form id="searchForm">
+        <input type="text" id="produto" placeholder="Digite o nome do produto..." required>
+        <input type="number" id="preco_min" placeholder="Preço mínimo">
+        <input type="number" id="preco_max" placeholder="Preço máximo">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <div id="resultados"></div>
+
+    <script>
+        document.getElementById("searchForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); 
+
+            let produto = document.getElementById("produto").value;
+            let precoMin = document.getElementById("preco_min").value;
+            let precoMax = document.getElementById("preco_max").value;
+
+            let url = `/buscar?produto=${encodeURIComponent(produto)}`;
+            if (precoMin) url += `&preco_min=${precoMin}`;
+            if (precoMax) url += `&preco_max=${precoMax}`;
+
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+                
+                let resultadosDiv = document.getElementById("resultados");
+                resultadosDiv.innerHTML = "";
+
+                if (data.error) {
+                    resultadosDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                    return;
+                }
+
+                data.forEach(produto => {
+                    let produtoHTML = `
+                        <div class="produto">
+                            <h3>${produto.titulo}</h3>
+                            <p><strong>Preço:</strong> R$ ${produto.preco.toFixed(2)}</p>
+                            <a href="${produto.link}" target="_blank">Ver no Buscapé</a>
+                        </div>
+                    `;
+                    resultadosDiv.innerHTML += produtoHTML;
+                });
+
+            } catch (error) {
+                console.error("Erro ao buscar produtos:", error);
+                document.getElementById("resultados").innerHTML = "<p style='color: red;'>Erro ao buscar produtos.</p>";
+            }
+        });
+    </script>
+
+</body>
+</html>
