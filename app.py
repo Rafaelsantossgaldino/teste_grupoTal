@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS  # Permite requisições entre domínios (se necessário)
 from search import buscar_produtos  # Importando a função de busca
+import os
 
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para permitir requisições do frontend
@@ -22,4 +23,8 @@ def buscar():
     return jsonify(produtos)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Render define a porta como variável de ambiente
+    app.run(host="0.0.0.0", port=port, debug=False)
+
+# if __name__ == "__main__":
+#     app.run(debug=True)
