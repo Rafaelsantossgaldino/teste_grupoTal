@@ -96,12 +96,14 @@ Exemplo de Resposta:
 Estrutura do Projeto
 ```sh
   api-busca-produtos/
-|-- app.py  # Servidor Flask
-|-- search.py  # Funções de busca e armazenamento no MongoDB
-|-- requirements.txt  # Dependências do projeto
-|-- Dockerfile  # Configuração do container
-|-- docker-compose.yml  # Orquestração dos containers
-|-- .env  # Variáveis de ambiente
+   |-- app.py  # Servidor Flask
+   |-- search.py  # Funções de busca e armazenamento no MongoDB
+   |-- locustfile.py
+   |-- test_search.py
+   |-- requirements.txt  # Dependências do projeto
+   |-- Dockerfile  # Configuração do container
+   |-- docker-compose.yml  # Orquestração dos containers
+   |-- .env  # Variáveis de ambiente
 ```
 # Na web acesse 
 ```sh
