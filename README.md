@@ -1,4 +1,4 @@
-# Aplicacao Flask para Busca de Produtos
+# Aplicação Flask para Busca de Produtos
 Este projeto consiste em uma API Flask que busca produtos no site Buscapé e armazena os resultados em um banco de dados MongoDB. A aplicação também inclui um Dockerfile e um arquivo docker-compose.yml para facilitar a implantação.
 
 📌 Tecnologias Utilizadas
