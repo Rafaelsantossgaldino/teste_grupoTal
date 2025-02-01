@@ -68,8 +68,7 @@
 
     <form id="searchForm">
         <input type="text" id="produto" placeholder="Digite o nome do produto..." required>
-        <input type="number" id="preco_min" placeholder="Preço mínimo">
-        <input type="number" id="preco_max" placeholder="Preço máximo">
+        <input type="number" id="preco" placeholder="Preço">
         <button type="submit">Buscar</button>
     </form>
 
@@ -80,12 +79,10 @@
             event.preventDefault(); 
 
             let produto = document.getElementById("produto").value;
-            let precoMin = document.getElementById("preco_min").value;
-            let precoMax = document.getElementById("preco_max").value;
+            let preco = document.getElementById("preco").value;
 
             let url = `/buscar?produto=${encodeURIComponent(produto)}`;
-            if (precoMin) url += `&preco_min=${precoMin}`;
-            if (precoMax) url += `&preco_max=${precoMax}`;
+            if (preco) url += `&preco=${preco}`;
 
             try {
                 let response = await fetch(url);

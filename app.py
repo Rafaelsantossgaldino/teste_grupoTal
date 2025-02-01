@@ -13,13 +13,12 @@ def index():
 @app.route("/buscar", methods=["GET"])
 def buscar():
     nome_produto = request.args.get("produto")
-    preco_min = request.args.get("preco_min", type=float)
-    preco_max = request.args.get("preco_max", type=float)
+    preco = request.args.get("preco", type=float)
 
     if not nome_produto:
         return jsonify({"error": "Informe um produto na URL, exemplo: /buscar?produto=iphone"}), 400
 
-    produtos = buscar_produtos(nome_produto, preco_min, preco_max)
+    produtos = buscar_produtos(nome_produto, preco)
     return jsonify(produtos)
 
 if __name__ == "__main__":

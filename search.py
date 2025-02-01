@@ -1,7 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
+import os
+from pymongo import MongoClient
+from dotenv import load_dotenv
+from datetime import datetime
 
-def buscar_produtos(nome_produto, preco_max=None, preco_min=None):
+# Carregar as variáveis do arquivo .env
+load_dotenv()
+
+# Acessar a variável MONGO_URI do arquivo .env
+MONGO_URI = os.getenv("MONGO_URI")
+
+# Conexão com o MongoDB
+client = MongoClient(MONGO_URI)
+db = client["gropotal"]  # Nome do banco de dados
+collection = db["produtos"]  # Nome da coleção
+
+
+def buscar_produtos(nome_produto, preco=None):
     url = f"https://www.buscape.com.br/search?q={nome_produto.replace(' ', '+')}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
@@ -30,26 +46,26 @@ def buscar_produtos(nome_produto, preco_max=None, preco_min=None):
                 continue  # Ignora se o preço não for válido
 
             # 🔹 Debug para verificar valores
-            print(f"Preço encontrado: {preco} | Min: {preco_min} | Max: {preco_max}")
+            # print(f"Preço encontrado: {titulo_elem} | Preço: {preco})
 
-            # 🔹 Aplicando corretamente o filtro de preço
-            if preco_min is not None and preco < preco_min:
-                continue  # Ignora se o preço for menor que o mínimo definido
-            if preco_max is not None and preco > preco_max:
-                continue  # Ignora se o preço for maior que o máximo definido
-
-            links_ofertas = []
-            for oferta in item.select("a[data-testid='product-card::offer']"):
-                link_oferta = oferta["href"] if "href" in oferta.attrs else None
-                if link_oferta:
-                    links_ofertas.append(f"https://www.buscape.com.br{link_oferta}")
-
-            produtos.append({
+            produto = {
                 "titulo": titulo_elem.text.strip(),
-                "preco": preco,
+                "preco": float(preco),
                 "link": f"https://www.buscape.com.br{link_elem}",
-                "ofertas": links_ofertas
-            })
+                "data_criacao": datetime.now().strftime("%d/%m/%Y")  
+            }
+
+            produto_existente = collection.find_one({"titulo": produto["titulo"], "preco": produto["preco"], "link": produto["link"], "data_criacao": produto["data_criacao"]})
+            if not produto_existente:
+                resultado = collection.insert_one(produto)
+                produto["_id"] = str(resultado.inserted_id)
+
+            # 🔹 Salvando no MongoDB
+            # resultado = collection.insert_one(produto)
+
+            # produto["_id"] = str(resultado.inserted_id)
+
+            produtos.append(produto)
 
     if not produtos:
         return {"error": "Nenhum produto encontrado"}
