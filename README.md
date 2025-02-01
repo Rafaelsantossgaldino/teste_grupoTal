@@ -92,7 +92,6 @@ Exemplo de Resposta:
   }
 ]
  ```
-Na web acesse 
 
 Estrutura do Projeto
 ```sh
@@ -104,6 +103,17 @@ Estrutura do Projeto
 |-- docker-compose.yml  # Orquestração dos containers
 |-- .env  # Variáveis de ambiente
 ```
+# Na web acesse 
+```sh
+   http://localhost:5000/
+```
+![image](https://github.com/user-attachments/assets/4f4bc674-1ae4-47ae-b521-cdcc1c9b9cd2)
+
+Digite o nome do produto e o preço 
+![image](https://github.com/user-attachments/assets/d9ba8fc7-9d27-4ca5-8c3c-47d48c6a7283)
+
+
+
 
 📢 Conclusão
 
