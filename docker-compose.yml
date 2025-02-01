@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb+srv://rafaelsantossgaldino2:Elpxco1HubbSNqeM@cluster7.1agzz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster7
+
+  mongo:
+    image: mongo:5.0
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
