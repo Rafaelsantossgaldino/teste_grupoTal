@@ -112,6 +112,18 @@ Estrutura do Projeto
 Digite o nome do produto e o preço 
 ![image](https://github.com/user-attachments/assets/d9ba8fc7-9d27-4ca5-8c3c-47d48c6a7283)
 
+# Para teste de carga
+Execute o comando:
+```sh
+   locust -f locustfile.py
+```
+Na web digite:
+```sh
+http://0.0.0.0:8089
+```
+![image](https://github.com/user-attachments/assets/26205097-a4d7-4f49-9303-356f5447e318)
+
+![image](https://github.com/user-attachments/assets/212a0614-1044-4968-bc73-b47ebe4cc6c0)
 
 
 
