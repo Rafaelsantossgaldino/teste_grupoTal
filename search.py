@@ -5,17 +5,18 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
 
-# Carregar as variáveis do arquivo .env
+# Carregar variáveis do arquivo .env
 load_dotenv()
 
 # Acessar a variável MONGO_URI do arquivo .env
 MONGO_URI = os.getenv("MONGO_URI")
 
-# Conexão com o MongoDB
-client = MongoClient(MONGO_URI)
-db = client["gropotal"]  # Nome do banco de dados
-collection = db["produtos"]  # Nome da coleção
-
+def get_mongo_collection():
+    """Cria uma conexão com o MongoDB dentro do worker"""
+    client = MongoClient(MONGO_URI)
+    db = client["gropotal"]  # Nome do banco de dados
+    collection = db["produtos"]  # Nome da coleção
+    return client, collection  # Retornamos o cliente para fechá-lo depois
 
 def buscar_produtos(nome_produto, preco=None):
     url = f"https://www.buscape.com.br/search?q={nome_produto.replace(' ', '+')}"
@@ -32,49 +33,51 @@ def buscar_produtos(nome_produto, preco=None):
     soup = BeautifulSoup(response.text, "html.parser")
     produtos = []
 
-    for item in soup.select("a[data-testid='product-card::card']"):
-        titulo_elem = item.select_one("h2[data-testid='product-card::name']")
-        preco_elem = item.select_one("p[data-testid='product-card::price']")
-        link_elem = item["href"] if "href" in item.attrs else None
+    # Criar a conexão com o MongoDB dentro do worker
+    client, collection = get_mongo_collection()
 
-        if titulo_elem and preco_elem and link_elem:
-            preco_texto = preco_elem.text.strip().replace("R$", "").replace(".", "").replace(",", ".")
+    try:
+        for item in soup.select("a[data-testid='product-card::card']"):
+            titulo_elem = item.select_one("h2[data-testid='product-card::name']")
+            preco_elem = item.select_one("p[data-testid='product-card::price']")
+            link_elem = item["href"] if "href" in item.attrs else None
 
-            try:
-                preco = float(preco_texto)
-            except ValueError:
-                continue  # Ignora se o preço não for válido
+            if titulo_elem and preco_elem and link_elem:
+                preco_texto = preco_elem.text.strip().replace("R$", "").replace(".", "").replace(",", ".")
 
-            # 🔹 Debug para verificar valores
-            # print(f"Preço encontrado: {titulo_elem} | Preço: {preco})
+                try:
+                    preco = float(preco_texto)
+                except ValueError:
+                    continue  # Ignora se o preço não for válido
 
-            produto = {
-                "titulo": titulo_elem.text.strip(),
-                "preco": float(preco),
-                "link": f"https://www.buscape.com.br{link_elem}",
-                "data_criacao": datetime.now().strftime("%d/%m/%Y")  
-            }
+                produto = {
+                    "titulo": titulo_elem.text.strip(),
+                    "preco": float(preco),
+                    "link": f"https://www.buscape.com.br{link_elem}",
+                    "data_criacao": datetime.now().strftime("%d/%m/%Y")
+                }
 
-            produto_existente = collection.find_one({"titulo": produto["titulo"], "preco": produto["preco"], "link": produto["link"], "data_criacao": produto["data_criacao"]})
-            if not produto_existente:
-                resultado = collection.insert_one(produto)
-                produto["_id"] = str(resultado.inserted_id)
+                # Verifica se o produto já existe no banco
+                produto_existente = collection.find_one({
+                    "titulo": produto["titulo"],
+                    "preco": produto["preco"],
+                    "link": produto["link"],
+                    "data_criacao": produto["data_criacao"]
+                })
+                
+                if not produto_existente:
+                    resultado = collection.insert_one(produto)
+                    produto["_id"] = str(resultado.inserted_id)
 
-            # 🔹 Salvando no MongoDB
-            # resultado = collection.insert_one(produto)
+                produtos.append(produto)
 
-            # produto["_id"] = str(resultado.inserted_id)
-
-            produtos.append(produto)
+    except Exception as e:
+        return {"error": str(e)}
+    
+    finally:
+        client.close()  # Fechar a conexão após o uso
 
     if not produtos:
         return {"error": "Nenhum produto encontrado"}
 
     return produtos
-    
-
-
-
-
-
-
